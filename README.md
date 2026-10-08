@@ -25,7 +25,8 @@ calls, while everything else looks fine. Lowering the MTU (1428 is a common safe
 
 Download the latest `SetMTU-v*-win-x64.zip` from the [Releases](https://github.com/riaanjutte/SetMTU/releases)
 page, extract it and run `SetMTU.exe`. It's a single portable exe with no installer, and it runs on
-Windows 10 and 11 (64-bit) without any extra runtimes. Each release lists SHA-256 checksums.
+Windows 10 and 11 (64-bit) without any extra runtimes. Each release lists SHA-256 checksums and
+links to its VirusTotal scan results.
 
 The exe isn't code-signed yet, so Windows may show a "Windows protected your PC" warning. Click
 **More info**, then **Run anyway**.
