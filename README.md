@@ -23,8 +23,9 @@ calls, while everything else looks fine. Lowering the MTU (1428 is a common safe
 
 ## Download
 
-Get `SetMTU.exe` from the [Releases](https://github.com/riaanjutte/SetMTU/releases) page. It's a single
-portable exe with no installer.
+Download the latest `SetMTU-v*-win-x64.zip` from the [Releases](https://github.com/riaanjutte/SetMTU/releases)
+page, extract it and run `SetMTU.exe`. It's a single portable exe with no installer, and it runs on
+Windows 10 and 11 (64-bit) without any extra runtimes. Each release lists SHA-256 checksums.
 
 The exe isn't code-signed yet, so Windows may show a "Windows protected your PC" warning. Click
 **More info**, then **Run anyway**.
@@ -45,6 +46,12 @@ cargo build --release
 ```
 
 The exe is written to `target\release\setmtu.exe`.
+
+To build a release zip and checksums in `dist\`:
+
+```bash
+powershell -ExecutionPolicy Bypass -File .\package.ps1
+```
 
 ## Licence
 
