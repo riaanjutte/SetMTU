@@ -64,8 +64,8 @@ git push origin v0.1.1
 ```
 
 The [Release workflow](.github/workflows/release.yml) runs the tests, builds the zip with `package.ps1`
-and publishes a GitHub release with SHA-256 checksums. Add the VirusTotal links to the release notes
-afterwards.
+and publishes a GitHub release with SHA-256 checksums. See [RELEASING.md](RELEASING.md) for the full
+checklist, test builds and what to do if a release fails.
 
 ## Licence
 
