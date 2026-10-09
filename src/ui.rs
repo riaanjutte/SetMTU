@@ -180,10 +180,52 @@ impl eframe::App for App {
                 ui.add_space(6.0);
                 fit_height_to_content(ui, ctx, central_bottom);
             });
+
+        self.restore_dialog(ctx);
     }
 }
 
 impl App {
+    /// Confirms what Restore did. Closes with OK, Enter, Escape or a click outside.
+    fn restore_dialog(&mut self, ctx: &egui::Context) {
+        let Some(dialog) = &self.dialog else {
+            return;
+        };
+        let c = theme::p();
+        let mut close = false;
+        let frame = egui::Frame::new()
+            .fill(c.panel)
+            .stroke(egui::Stroke::new(1.0, c.border))
+            .corner_radius(6)
+            .inner_margin(egui::Margin::same(16));
+        let modal = egui::Modal::new(egui::Id::new("restore_dialog"))
+            .frame(frame)
+            .show(ctx, |ui| {
+                ui.set_width(320.0);
+                ui.horizontal(|ui| {
+                    let (icon, color) = if dialog.ok { ("✔", c.good) } else { ("⚠", c.bad) };
+                    ui.label(egui::RichText::new(icon).color(color).size(16.0));
+                    ui.label(theme::semibold(&dialog.title, 15.0).color(c.text));
+                });
+                ui.add_space(6.0);
+                for line in &dialog.lines {
+                    ui.label(egui::RichText::new(line).color(c.text).size(13.0));
+                }
+                ui.add_space(12.0);
+                let row = egui::vec2(ui.available_width(), 28.0);
+                ui.allocate_ui_with_layout(row, egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    let ok = egui::Button::new(theme::semibold("OK", 13.0).color(c.text))
+                        .min_size(egui::vec2(80.0, 28.0));
+                    if ui.add(ok).clicked() || ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                        close = true;
+                    }
+                });
+            });
+        if close || modal.should_close() {
+            self.dialog = None;
+        }
+    }
+
     fn header(&mut self, ui: &mut egui::Ui, busy: bool) {
         ui.horizontal(|ui| {
             ui.add(egui::Image::new(egui::load::SizedTexture::new(

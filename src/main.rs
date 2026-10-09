@@ -100,6 +100,13 @@ struct LogEntry {
     text: String,
 }
 
+/// Modal confirmation shown after a restore.
+struct Dialog {
+    ok: bool,
+    title: String,
+    lines: Vec<String>,
+}
+
 struct App {
     /// Busiest first.
     adapters: Vec<Interface>,
@@ -112,6 +119,7 @@ struct App {
     /// Latest result; moved into `log` with a timestamp on the next frame.
     status: Option<Status>,
     log: Vec<LogEntry>,
+    dialog: Option<Dialog>,
     icon: egui::TextureHandle,
     // Expanded/collapsed sections.
     show_more: bool,
@@ -135,6 +143,7 @@ impl App {
             pending: None,
             status: None,
             log: Vec::new(),
+            dialog: None,
             icon: ctx.load_texture("app-icon", image, egui::TextureOptions::LINEAR),
             show_more: false,
             show_originals: false,
@@ -263,11 +272,31 @@ impl App {
             }
             Outcome::Undo { results } => {
                 let mut restored = Vec::new();
+                let mut lines = Vec::new();
                 let mut errors = Vec::new();
                 for (record, result) in results {
                     match result {
                         Ok(()) => {
                             self.store.records.retain(|r| r.luid != record.luid);
+                            // Show what the adapter reports now, not just what was requested.
+                            let now = self.adapters.iter().find(|i| i.luid == record.luid);
+                            let v4 = now.and_then(|i| i.mtu_v4).or(record.mtu_v4);
+                            let v6 = now.and_then(|i| i.mtu_v6).or(record.mtu_v6);
+                            let mut families = Vec::new();
+                            if let Some(m) = v4 {
+                                families.push(format!("IPv4 {m}"));
+                            }
+                            if let Some(m) = v6 {
+                                families.push(format!("IPv6 {m}"));
+                            }
+                            lines.push(format!("{}: {}", record.alias, families.join(", ")));
+                            // Make the controls reflect the restored value for the
+                            // adapter on screen, instead of the target that was applied.
+                            if Some(record.luid) == self.selected {
+                                if let Some(m) = v4.or(v6) {
+                                    self.target = m;
+                                }
+                            }
                             restored.push(record.alias);
                         }
                         Err(e) => errors.push(e),
@@ -276,6 +305,12 @@ impl App {
                 if let Err(e) = self.store.save() {
                     errors.push(format!("Could not update saved originals: {e}"));
                 }
+                self.dialog = Some(if errors.is_empty() {
+                    Dialog { ok: true, title: "Original MTU restored".into(), lines }
+                } else {
+                    lines.extend(errors.iter().cloned());
+                    Dialog { ok: false, title: "Restore didn't complete".into(), lines }
+                });
                 if errors.is_empty() {
                     Status {
                         ok: true,

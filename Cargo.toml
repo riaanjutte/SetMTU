@@ -1,6 +1,6 @@
 [package]
 name = "setmtu"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Windows utility to set a network interface's MTU (1428 by default), with one-click restore"
 license = "MIT"
