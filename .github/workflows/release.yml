@@ -1,0 +1,81 @@
+# Builds, packages and publishes a release when a version tag is pushed:
+#
+#   git tag v0.1.1
+#   git push origin v0.1.1
+#
+# The tag must match the version in Cargo.toml. Running the workflow by hand
+# (Actions tab > Release > Run workflow) builds and uploads the zip as a
+# workflow artifact without publishing anything.
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust (version from rust-toolchain.toml)
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Check tag matches Cargo.toml version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $version = (Select-String -Path Cargo.toml -Pattern '^version\s*=\s*"([^"]+)"' |
+              Select-Object -First 1).Matches[0].Groups[1].Value
+          if ("v$version" -ne "${{ github.ref_name }}") {
+              throw "Tag ${{ github.ref_name }} doesn't match Cargo.toml version $version"
+          }
+
+      - name: Test
+        run: cargo test --locked
+
+      - name: Package
+        shell: pwsh
+        run: ./package.ps1
+
+      - name: Upload zip as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SetMTU-${{ github.ref_name }}
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
+
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $sums = (Get-Content dist/SHA256SUMS.txt -Raw).Trim()
+          $notes = @"
+          ### Download
+
+          ``SetMTU-$tag-win-x64.zip``: extract it and run ``SetMTU.exe``. It's portable with no installer, and runs on Windows 10 and 11 (64-bit) without extra runtimes.
+
+          The exe isn't code-signed yet, so Windows may show "Windows protected your PC". Click **More info**, then **Run anyway**.
+
+          Built by GitHub Actions from commit ${{ github.sha }}.
+
+          ### SHA-256
+
+          ``````
+          $sums
+          ``````
+          "@
+          Set-Content release-notes.md $notes
+          gh release create $tag (Get-ChildItem dist/*.zip).FullName dist/SHA256SUMS.txt `
+              --title "SetMTU $tag" --notes-file release-notes.md --verify-tag

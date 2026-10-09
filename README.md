@@ -54,6 +54,19 @@ To build a release zip and checksums in `dist\`:
 powershell -ExecutionPolicy Bypass -File .\package.ps1
 ```
 
+## Releasing
+
+Releases are built by GitHub Actions. Bump `version` in `Cargo.toml`, commit, then push a matching tag:
+
+```bash
+git tag v0.1.1
+git push origin v0.1.1
+```
+
+The [Release workflow](.github/workflows/release.yml) runs the tests, builds the zip with `package.ps1`
+and publishes a GitHub release with SHA-256 checksums. Add the VirusTotal links to the release notes
+afterwards.
+
 ## Licence
 
 SetMTU is released under the [MIT licence](LICENSE).

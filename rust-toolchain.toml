@@ -1,0 +1,4 @@
+# Same compiler locally and in GitHub Actions, so release builds are reproducible.
+[toolchain]
+channel = "1.96.0"
+profile = "minimal"
