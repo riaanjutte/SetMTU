@@ -44,11 +44,35 @@ A red ✗ means the tests failed. Open the run to see why.
    `https://github.com/riaanjutte/SetMTU/releases/download/v0.1.1/SetMTU-v0.1.1-win-x64.zip`.
    Then add the zip and exe report links to the release notes (**Edit** on the release page). The
    reports are at `https://www.virustotal.com/gui/file/<sha256>`, using the hashes from `SHA256SUMS.txt`.
-7. **Announce it** (for example on Discord) with the release link, the exe's SHA-256 and the
+7. **Check the winget PR** the workflow opened (see [winget](#winget) below).
+8. **Announce it** (for example on Discord) with the release link, the exe's SHA-256 and the
    VirusTotal link. `package.ps1` prints a ready-made post when run locally.
 
 The tag must match the version in `Cargo.toml` (`v0.1.1` for `0.1.1`). If it doesn't, the workflow
 stops before publishing anything.
+
+## winget
+
+SetMTU is published to the Windows Package Manager as `riaanjutte.SetMTU`, so users can run
+`winget install riaanjutte.SetMTU` and get updates with `winget upgrade`.
+
+**After each release**, the Release workflow's `winget` job opens a pull request to
+[microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) with the new version. Microsoft's
+bots validate and scan it, and it's usually merged within a day or two. Watch for review comments
+on that PR.
+
+**One-time setup** for the automatic PRs:
+
+1. Fork [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) to your account (no need to clone it).
+2. Create a classic personal access token with the `public_repo` scope
+   (GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)).
+3. Add it to this repo as an Actions secret named `WINGET_TOKEN`
+   (repo → Settings → Secrets and variables → Actions).
+
+Without the secret, the job is skipped with a notice and nothing else is affected.
+
+The manifests for the first submission (v0.1.0) are in [`winget/`](winget/), using the same folder
+layout as winget-pkgs. Validate changes with `winget validate --manifest <folder>`.
 
 ## Test builds without releasing
 

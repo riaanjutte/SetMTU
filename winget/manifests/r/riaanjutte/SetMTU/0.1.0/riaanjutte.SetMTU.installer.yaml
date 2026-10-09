@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
+
+PackageIdentifier: riaanjutte.SetMTU
+PackageVersion: 0.1.0
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+- RelativeFilePath: SetMTU.exe
+  PortableCommandAlias: setmtu
+MinimumOSVersion: 10.0.0.0
+ReleaseDate: 2026-10-08
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/riaanjutte/SetMTU/releases/download/v0.1.0/SetMTU-v0.1.0-win-x64.zip
+  InstallerSha256: 710D2847EAC27400FE96751A85FCF820249989B9259B8473B9885062A267A05E
+ManifestType: installer
+ManifestVersion: 1.10.0

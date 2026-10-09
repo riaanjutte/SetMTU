@@ -79,3 +79,31 @@ jobs:
           Set-Content release-notes.md $notes
           gh release create $tag (Get-ChildItem dist/*.zip).FullName dist/SHA256SUMS.txt `
               --title "SetMTU $tag" --notes-file release-notes.md --verify-tag
+
+  # Opens a pull request to microsoft/winget-pkgs for the new version.
+  # Needs a WINGET_TOKEN secret (see RELEASING.md); skipped if it isn't set.
+  winget:
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: windows-latest
+    steps:
+      - name: Check for WINGET_TOKEN
+        id: token
+        shell: pwsh
+        env:
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: |
+          if ($env:WINGET_TOKEN) {
+              "present=true" >> $env:GITHUB_OUTPUT
+          } else {
+              "present=false" >> $env:GITHUB_OUTPUT
+              Write-Host "::notice::WINGET_TOKEN secret isn't set, so the winget update was skipped."
+          }
+
+      - name: Submit to winget
+        if: steps.token.outputs.present == 'true'
+        uses: vedantmgoyal9/winget-releaser@v2
+        with:
+          identifier: riaanjutte.SetMTU
+          installers-regex: '-win-x64\.zip$'
+          token: ${{ secrets.WINGET_TOKEN }}

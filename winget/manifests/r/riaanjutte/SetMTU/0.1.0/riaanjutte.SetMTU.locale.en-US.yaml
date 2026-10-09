@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: riaanjutte.SetMTU
+PackageVersion: 0.1.0
+PackageLocale: en-US
+Publisher: riaanjutte
+PublisherUrl: https://github.com/riaanjutte
+PublisherSupportUrl: https://github.com/riaanjutte/SetMTU/issues
+Author: riaanjutte
+PackageName: SetMTU
+PackageUrl: https://github.com/riaanjutte/SetMTU
+License: MIT
+LicenseUrl: https://github.com/riaanjutte/SetMTU/blob/main/LICENSE
+Copyright: Copyright (c) 2026 riaanjutte
+ShortDescription: Set a network interface's MTU (1428 by default) and restore the original with one click.
+Description: |-
+  SetMTU is a small utility that sets the IP MTU (Maximum Transmission Unit) of a network interface.
+  The Windows default of 1500 bytes is too large for many PPPoE, fibre and VPN links, which shows up as stalled page loads, slow transfers or dropped calls.
+  SetMTU lists your adapters, picks the busiest one, shows the exact netsh commands before running them, and saves the original values so Restore puts them back.
+  Changes need administrator approval (UAC) and persist across restarts.
+Moniker: setmtu
+Tags:
+- mtu
+- network
+- networking
+- netsh
+- pppoe
+- vpn
+ReleaseNotesUrl: https://github.com/riaanjutte/SetMTU/releases/tag/v0.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
